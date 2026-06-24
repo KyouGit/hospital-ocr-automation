@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hospital OCR Automation Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div>
+          <p class="eyebrow">Portfolio Demo</p>
+          <h1>Hospital EMR OCR Automation</h1>
+          <p class="summary">
+            A Windows automation pipeline that captures a legacy hospital EMR screen, reads lab text with template matching, maps it to internal exam codes, and exports CSV.
+          </p>
+        </div>
+
+        <section class="metric-grid" aria-label="project metrics">
+          <div><strong>500+</strong><span>reports/day</span></div>
+          <div><strong>4-5h</strong><span>saved/day</span></div>
+          <div><strong>99.2%</strong><span>field accuracy</span></div>
+        </section>
+
+        <nav class="step-list" aria-label="demo steps">
+          <button class="step-button active" data-step="0"><span>1</span>EMR window detection</button>
+          <button class="step-button" data-step="1"><span>2</span>Panel capture</button>
+          <button class="step-button" data-step="2"><span>3</span>Sliding-window OCR</button>
+          <button class="step-button" data-step="3"><span>4</span>Code matching</button>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Synthetic Delphi-style demonstration</p>
+            <h2 id="step-title">EMR window detection</h2>
+          </div>
+          <div class="actions">
+            <button id="prev-step" class="icon-button" aria-label="Previous step">&lt;</button>
+            <button id="run-demo" class="primary-button">Run demo</button>
+            <button id="next-step" class="icon-button" aria-label="Next step">&gt;</button>
+          </div>
+        </header>
+
+        <section class="demo-grid">
+          <div class="emr-window" aria-label="mock Delphi EMR screen">
+            <div class="legacy-titlebar">
+              <span class="app-icon"></span>
+              <strong>U2Bio EMR Lab Result Viewer - [PatientResultForm]</strong>
+              <div class="window-controls"><button>_</button><button>[]</button><button>X</button></div>
+            </div>
+
+            <div class="legacy-menubar">
+              <span>File(F)</span><span>Search(R)</span><span>Lab(L)</span><span>Print(P)</span><span>Tools(T)</span><span>Help(H)</span>
+            </div>
+
+            <div class="legacy-toolbar">
+              <button>Search</button><button>Refresh</button><button>History</button><button>Print</button><button>CSV</button>
+              <label>Date</label><input value="2026-06-24" readonly />
+              <label>Chart No</label><input value="D-024810" readonly />
+            </div>
+
+            <div class="patient-strip">
+              <div><span>Name</span><strong>Demo Patient</strong></div>
+              <div><span>Chart</span><strong>D-024810</strong></div>
+              <div><span>Dept</span><strong>Laboratory</strong></div>
+              <div><span>Status</span><strong>Result OK</strong></div>
+            </div>
+
+            <div class="legacy-tabs">
+              <button class="active">Lab Result</button><button>Orders</button><button>Opinion</button><button>Previous</button>
+            </div>
+
+            <div class="emr-body">
+              <section class="legacy-panel left-panel">
+                <div class="panel-caption">TDrawGrid: Lab panels</div>
+                <table class="legacy-grid panel-grid">
+                  <thead><tr><th>No</th><th>Panel</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr class="selected"><td>001</td><td>CBC</td><td>Done</td></tr>
+                    <tr><td>002</td><td>Chemistry</td><td>Done</td></tr>
+                    <tr class="yellow"><td>003</td><td>Inflammation</td><td>Wait</td></tr>
+                    <tr><td>004</td><td>Liver function</td><td>Done</td></tr>
+                    <tr><td>005</td><td>Renal function</td><td>Done</td></tr>
+                    <tr class="blue"><td>006</td><td>Urinalysis</td><td>Done</td></tr>
+                    <tr><td>007</td><td>Electrolyte</td><td>Done</td></tr>
+                    <tr><td>008</td><td>Coagulation</td><td>Done</td></tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section class="legacy-panel right-panel">
+                <div class="panel-caption">TPanel: Captured result region</div>
+                <div class="capture-frame">
+                  <div class="scan-line"></div>
+                  <table class="legacy-grid result-grid">
+                    <thead>
+                      <tr><th>Code</th><th>Exam item</th><th>Result</th><th>Unit</th><th>Ref.</th><th>Flag</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr class="ocr-target"><td>WBC</td><td>White Blood Cell</td><td>5.8</td><td>10^3/uL</td><td>4.0-10.0</td><td></td></tr>
+                      <tr><td>RBC</td><td>Red Blood Cell</td><td>4.71</td><td>10^6/uL</td><td>4.2-5.8</td><td></td></tr>
+                      <tr><td>Hb</td><td>Hemoglobin</td><td>14.2</td><td>g/dL</td><td>13.0-17.0</td><td></td></tr>
+                      <tr><td>PLT</td><td>Platelet</td><td>244</td><td>10^3/uL</td><td>150-450</td><td></td></tr>
+                      <tr><td>CRP</td><td>C-Reactive Protein</td><td>0.18</td><td>mg/dL</td><td>0.00-0.50</td><td></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="sliding-demo" aria-label="sliding window OCR demo">
+                  <div class="panel-caption">Template matching OCR: sliding window</div>
+                  <div class="ocr-strip">
+                    <span class="ocr-text" id="ocr-text">WBC 5.8</span>
+                    <span class="window-box" id="window-box"></span>
+                  </div>
+                  <div class="template-board">
+                    <div class="template-card active" data-template="W">
+                      <span>W</span><small>MSE 018</small>
+                    </div>
+                    <div class="template-card" data-template="B">
+                      <span>B</span><small>MSE 227</small>
+                    </div>
+                    <div class="template-card" data-template="C">
+                      <span>C</span><small>MSE 241</small>
+                    </div>
+                    <div class="template-card" data-template="5">
+                      <span>5</span><small>MSE 312</small>
+                    </div>
+                  </div>
+                  <div class="algorithm-note">
+                    <code>for x in range(width): crop = image[x:x+w]; score = MSE(crop, template)</code>
+                  </div>
+                </div>
+
+                <div class="opinion-box">
+                  <strong>Opinion</strong>
+                  <span>No critical abnormal finding. Follow-up recommended.</span>
+                </div>
+              </section>
+            </div>
+
+            <div class="legacy-statusbar">
+              <span>Ready</span><span>Rows: 008</span><span>Handle: TDrawGrid($000A13F2)</span><span>DPI 125%</span>
+            </div>
+          </div>
+
+          <aside class="inspector">
+            <div class="status-card">
+              <p class="eyebrow">Current operation</p>
+              <h3 id="operation-title">Connect to target app</h3>
+              <p id="operation-copy">Find the Delphi TApplication window and enumerate TDrawGrid controls with pywinauto.</p>
+            </div>
+
+            <div class="progress-card">
+              <div class="progress-row"><span>Capture</span><strong id="capture-progress">0%</strong></div>
+              <div class="progress-track"><i id="capture-bar"></i></div>
+              <div class="progress-row"><span>OCR</span><strong id="ocr-progress">0%</strong></div>
+              <div class="progress-track"><i id="ocr-bar"></i></div>
+            </div>
+
+            <div class="log-panel" aria-label="automation log">
+              <div class="panel-title">Automation log</div>
+              <ol id="log-list"><li>Waiting for demo...</li></ol>
+            </div>
+          </aside>
+        </section>
+
+        <section class="result-section">
+          <div>
+            <p class="eyebrow">CSV output preview</p>
+            <h2>Matched medical codes</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="result-table">
+              <thead><tr><th>panel</th><th>recognized_text</th><th>exam_code</th><th>exam_name</th></tr></thead>
+              <tbody id="result-body">
+                <tr><td>CBC</td><td>WBC</td><td></td><td></td></tr>
+                <tr><td>CBC</td><td>RBC</td><td></td><td></td></tr>
+                <tr><td>CBC</td><td>Hb</td><td></td><td></td></tr>
+                <tr><td>Inflammation</td><td>CRP</td><td></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
